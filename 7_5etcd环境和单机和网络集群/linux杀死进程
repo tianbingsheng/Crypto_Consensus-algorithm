@@ -1,0 +1,2 @@
+netstat -ntulp | grep 3306 
+sudo kill 1221

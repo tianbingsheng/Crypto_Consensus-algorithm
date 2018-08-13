@@ -1,0 +1,49 @@
+TOKEN=token-03
+CLUSTER_STATE=new
+NAME_1=machine-1
+NAME_2=machine-2
+NAME_3=machine-3
+HOST_1=10.0.151.215
+HOST_2=10.0.151.221
+HOST_3=10.0.151.225
+CLUSTER=${NAME_1}=http://${HOST_1}:2380,${NAME_2}=http://${HOST_2}:2380,${NAME_3}=http://${HOST_3}:2380
+
+
+添加
+./etcdctl --endpoints=$ENDPOINTS member add cd3 --peer-urls=http://10.0.151.235:2180
+Member b9057cfdc8ff17ce added to cluster 9da8cd75487bd6dc
+
+
+
+
+
+启动
+
+
+TOKEN=token-03
+CLUSTER_STATE=new
+NAME_1=machine-1
+NAME_2=machine-2
+NAME_3=machine-3
+NAME_4=machine-4
+HOST_1=10.0.151.215
+HOST_2=10.0.151.221
+HOST_3=10.0.151.225
+HOST_4=10.0.151.235
+CLUSTER=${NAME_1}=http://${HOST_1}:2380,${NAME_2}=http://${HOST_2}:2380,${NAME_3}=http://${HOST_3}:2380,${NAME_4}=http://${HOST_4}:2380
+
+没用这种方式启动
+./etcd --name cd3 --listen-client-urls http://127.0.0.1:2179 --advertise-client-urls http://127.0.0.1:2179 --listen-peer-urls http://127.0.0.1:2180 --initial-advertise-peer-urls http://127.0.0.1:2180 --initial-cluster-state existing --initial-cluster cd2=http://127.0.0.1:2580,cd0=http://127.0.0.1:2380,cd3=http://127.0.0.1:2180,cd1=http://127.0.0.1:2480 --initial-cluster-token etcd-cluster-1
+
+启动
+THIS_NAME=${NAME_4}
+THIS_IP=${HOST_4}
+./etcd --data-dir=data.etcd --name ${THIS_NAME} --initial-advertise-peer-urls http://${THIS_IP}:2380 --listen-peer-urls http://${THIS_IP}:2380 --advertise-client-urls http://${THIS_IP}:2379 --listen-client-urls http://${THIS_IP}:2379 --initial-cluster ${CLUSTER} --initial-cluster-state ${CLUSTER_STATE} --initial-cluster-token ${TOKEN}
+
+
+
+
+
+
+
+

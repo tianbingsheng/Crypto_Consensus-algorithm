@@ -1,0 +1,108 @@
+一，什么是挖矿？
+
+加密货币必须保持其稀缺性才能保证其价值 ，假如任何人都可以在任何时间产生任意多的比特币，那么比特币将一文不值。比特币算法每隔10分种就会向网络中的发现下一个区块的成员（节点）发送一定量的比特币。
+节点需要与其他节点竟争共同做一项“工作”，这个工作就是挖矿。
+
+二，如何挖矿？
+如果你在google中搜索“比特币挖矿是如何工作的”，你将会得到很多结果，大部分都会告诉你是“解一个数学难题”，从技术角度将这个回答是没问题的，但是却是非常无用且平庸，为了理解比特币是如何挖矿的我们需要了解一点加密算法和哈希算法。
+
+三，加密算法和哈希算法
+单向加密算法是使用一个加密函数将可读明文如：“Hello World” 转换为不可读的密文。这个加密函数广泛存在且复杂。越复杂的算法对密码逆向工程来说就越难破解。如加密算法广泛的应用于存储用户密码。
+我们以SHA-256为例，这个网站hashing website可以很方便的将数据进行SHA-256计算。如我们对”Hello world”进行SHA-256计算，可以得到如下结果
+无论我们计算多少次”Hello world”的SHA-256值，你得到的结果都是同一个，这种特性叫做 幂等性
+加密算法的一个基础特性是很容易由明文产生密文，但是很难由密文推断出明文，就以上边”Hello world“ 为例，我们很容易的就能计算出Hello world 的SHA-256值 ，但你从其SHA-256值 很难得到”Hello world”,这就叫做单向加密。
+
+
+四，挖矿
+现在我们了解了加密算法，我们可以开始聊数字货币挖矿了。比特币需要找到一种方法让参与者为了挣得比特币而工作，所以其发行的速度不能太快。比特币使参与者尝试不同的组合直到产生的哈希值变成由指定个数的0开头的值。
+如，我们使用 hash website 计算 886 其哈希值是由3个0开头的。
+但是我们怎么知道886的哈希值是由3个0开头的呢？这就是重点，在写这篇博客时我们是不知道的。我们需要尝试不同的数字、字符计算并检测其哈希值直到找到一个组合使得其哈希值是以3个0开头的。
+实际上任何人可以很容易的检验886的哈希值是否是以3个0开头的证明，我们是做了很多次尝试使用了很多不同组合才得到这样的结果。因此假如我是第一个发现这个结果，我们将得到比特币奖励，因为其他节点很容易就能验证886的哈希值是以3个0开头的，这就是为什么说比特币的一致性算法是Proof-of-work (POW:工作量证明）
+比特币难度更大一些（需要以更多的0开头），比特币网络动态的调整开头0的个数以保证每10分钟左右出一个块，这就是动态调整出块难度。
+
+
+
+
+
+
+package main
+
+import (
+	"time"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"strconv"
+	"strings"
+)
+
+
+type Block struct {
+	PreHash string
+	HashCode string
+	TimeStamp string
+	Diffi int
+	Data string
+	Index int
+	Nonce int
+
+}
+
+
+func GenerateFirstBlock() Block {
+	var firstblock Block
+	firstblock.PreHash = "0"
+	firstblock.TimeStamp= time.Now().String()
+	firstblock.Diffi = 4
+	firstblock.Data = "创世区块"
+	firstblock.Index = 1
+	firstblock.Nonce = 0
+	firstblock.HashCode = GenerationHashValue(firstblock)
+	return  firstblock
+}
+
+func GenerationHashValue(oldBlock Block) string {
+	var hashdata = strconv.Itoa(oldBlock.Nonce)+strconv.Itoa(oldBlock.Diffi)+oldBlock.TimeStamp
+	//fmt.Println(hashdata)
+	var sha = sha256.New()
+	sha.Write([]byte(hashdata))
+	hashed:=sha.Sum(nil)
+	return  hex.EncodeToString(hashed)
+}
+
+func GenerateNextBlock(data string,oldBlock Block ) Block {
+	var newBlock Block
+	newBlock.TimeStamp=time.Now().String()
+	newBlock.Diffi = 4
+	newBlock.Index = 2
+	newBlock.Data = data
+	newBlock.PreHash= oldBlock.HashCode
+	newBlock.Nonce = 0
+
+	for {
+		time.Sleep(time.Microsecond*100)
+		var hashValue string= GenerationHashValue(newBlock)
+		newBlock.Nonce ++
+		fmt.Println(hashValue)
+		repts:=strings.Repeat("0",newBlock.Diffi)
+		if strings.HasPrefix(hashValue,repts){
+			fmt.Println("挖矿成功")
+			break
+
+		}
+
+	}
+	return  newBlock
+}
+
+func main() {
+	//创建创世区块
+	var firstBlock Block = GenerateFirstBlock()
+	fmt.Println(firstBlock.Diffi)
+
+	 GenerateNextBlock("区块二",firstBlock)
+
+
+}
+
+
